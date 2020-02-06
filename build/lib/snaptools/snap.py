@@ -715,7 +715,7 @@ def getCellPeakVector(f, peak_file, peak_dict, barcode_dict, barcode, tmp_folder
     return((idx_list, idy_list, count_list))
 
 
-def getFragFromBarcode(fname, barcode_list):
+def getFragFromBarcode(fname, barcode_list,barcode_dict):
     """Extract fragments of given barcodes
 
     Attributes:
@@ -728,7 +728,7 @@ def getFragFromBarcode(fname, barcode_list):
     """
 
     # extract the fragments of given barcodes;
-    barcode_dict = getBarcodesFromSnap(fname);
+#     barcode_dict = getBarcodesFromSnap(fname);  ##  no need to regenerate
     # get the fragments of selected barcodes;
     f = h5py.File(fname, "r", libver='earliest');
     frag_list = []
@@ -740,7 +740,8 @@ def getFragFromBarcode(fname, barcode_list):
         _chroms = [item.decode() for item in f["FM"]["fragChrom"][barcodePos:(barcodePos + barcodeLen)]];
         _start = f["FM"]["fragStart"][barcodePos:(barcodePos + barcodeLen)];
         _len = f["FM"]["fragLen"][barcodePos:(barcodePos + barcodeLen)];        
-        frag_list = frag_list + list(zip(_chroms, _start, _start + _len, [barcode] * len(_chroms)));
+#         frag_list = frag_list + list(zip(_chroms, _start, _start + _len, [barcode] * len(_chroms)));
+	frag_list.extend(list(zip(_chroms, _start, _start + _len, [barcode] * len(_chroms))))
     f.close()
     return frag_list
   
@@ -831,7 +832,7 @@ def dump_read(snap_file,
     # cut the barcode into chunks and write down seperately
     for i in range(nChunk):
         # extract the fragment list of given barcodes
-        frag_list = getFragFromBarcode(snap_file, barcode_list[i]);
+        frag_list = getFragFromBarcode(snap_file, barcode_list[i], barcode_dict);
         for item in frag_list:
             fout.write(("\t".join(map(str, item)) + "\n").encode())
         del frag_list
